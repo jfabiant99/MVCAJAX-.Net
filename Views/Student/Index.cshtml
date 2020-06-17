@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Please enter the details below</h5>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="hidden" name="StudentID" id="StudentID"/>
+                    <div class="form-group">
+                        <label>Codigo</label>
+                        <input type="text" name="Codigo" id="Codigo" class="form-control" placeholder="Enter Student Code" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Student Name</label>
+                        <input type="text" name="StudentName" id="StudentName" class="form-control" placeholder="Enter Student Name" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="LastName" id="LastName" class="form-control" placeholder="Enter LastName" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Student Address</label>
+                        <input type="text" name="StudentAddress" id="StudentAddress" class="form-control" placeholder="Enter Student Address" required />
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="openModal">Close</button>
+                <button type="button" class="btn btn-primary" name="SubmitButton" id="btnSave">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row" style="margin-top:15px;">
+    <div class="col-md-12">
+        <button type="button" class="btn btn-primary" id="newStudent" data-toggle="modal" data-target="#formModal">New student</button>
+    </div>
+    <div class="col-md-12">
+        <br />
+        <table id="tblStudent" class="table table-bordered table-striped table-responsive table-hover">
+            <thead>
+                <tr>
+                    <th align="left" class="productth">ID</th>
+                    <th align="left" class="productth">Codigo</th>
+                    <th align="left" class="productth">Student Name</th>
+                    <th align="left" class="productth">LastName</th>
+                    <th align="left" class="productth">Student Address</th>
+                    <th align="left" class="productth">Fecha Creación</th>
+                    <th align="left" class="productth">Fecha Modificación</th>
+                    <th align="left" class="productth" colspan="2">Operaciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+@section Scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.2/moment.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            LoadData();
+            $("#btnSave").click(function () {
+
+                var std = {};
+                std.StudentID = $('#StudentID').val();
+                std.Codigo = $('#Codigo').val();
+                std.StudentName = $('#StudentName').val();
+                std.LastName = $('#LastName').val();
+                std.StudentAddress = $('#StudentAddress').val();
+
+                console.log(std);
+
+                if (std.StudentID) {
+
+                    $.ajax({
+                    type: "POST",
+                        url: '@Url.Action("UpdateStudent")',
+                        data: '{ std: ' + JSON.stringify(std) + '}, {id: ' + std.StudentID + '}',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        LoadData();
+                    },
+                    error: function () {
+                        alert("Error while inserting data");
+                    }
+                    });
+
+                } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateStudent")',
+                    data: '{ std: ' + JSON.stringify(std) + '}',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        LoadData();
+                    },
+                    error: function () {
+                        alert("Error while inserting data");
+                    }
+                });
+
+                }
+
+                //Close modal and clear fields
+                clearForm();
+                closeModal();
+                return false;
+            });
+        });
+
+        $(document).on("click", "#newStudent", function () {
+            clearForm();
+        });
+
+        function clearForm() {
+            $('#Codigo').val('');
+            $('#StudentName').val('');
+            $('#LastName').val('');
+            $('#StudentAddress').val('');
+        }
+
+        function closeModal() {
+            $('#formModal').modal('hide');
+        }
+
+        function openModal() {
+            clearForm();
+        }
+
+        function transformDateTime(datetime) {
+            let value;
+
+            if (datetime) {
+                let dateFormmat = new Date(parseInt(datetime.substr(6))).toString();
+                value = dateFormmat.replace("GMT-0500 (Peru Standard Time)", "");
+            } else {
+                value = "-";
+            }
+
+            return value;
+        }
+
+        function LoadData() {
+            $("#tblStudent tbody tr").remove();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getStudent")',
+                dataType: "json",
+                data: { id: ''},
+                success: function (data) {
+                    var items = '';
+                    $.each(data, function (i, item) {
+                        console.log(item);
+                        var rows = "<tr>"
+                            + "<td class'producttd'>" + item.StudentID + "</td>"
+                            + "<td class'producttd'>" + item.Codigo + "</td>"
+                            + "<td class'producttd'>" + item.StudentName + "</td>"
+                            + "<td class'producttd'>" + item.LastName + "</td>"
+                            + "<td class'producttd'>" + item.StudentAddress + "</td>"
+                            + "<td class'producttd'>" + transformDateTime(item.FechaCreacion) + "</td>"
+                            + "<td class'producttd'>" + transformDateTime(item.FechaModificacion) + "</td>"
+                            + '<td><button onClick="detailStudent(' + item.StudentID + ')" class="btn btn-info "><i class="glyphicon glyphicon-pencil"></i></button></td>'
+                            + '<td><button onClick="deleteStudent(' + item.StudentID + ')" class="btn btn-danger "><i class="glyphicon glyphicon-trash"></i></button></td>'
+                            + "</tr>";
+                        $('#tblStudent tbody').append(rows);
+                    });
+                },
+                error: function (ex) {
+                    var r = jQuery.parseJSON(response.responseText);
+                    alert("Message: " + r.Message);
+                    alert("StackTrace: " + r.StackTrace);
+                    alert("ExceptionType: " + r.ExceptionType);
+                }
+            });
+            return false;
+        }
+
+        function deleteStudent(student_id) {
+            if (confirm('Desea eliminar este registro?')) {
+                $.post('@Url.Action("DeleteStudent")', { id: student_id }, (data) => {
+                    LoadData();
+                });
+            }
+
+        }
+
+        function detailStudent(student_id) {
+            $("#formModal").modal("show");
+            $.post('@Url.Action("EstudentDetail")', { Id: student_id }, (data) => {
+                $("#StudentID").val(data.StudentID);
+                $("#Codigo").val(data.Codigo);
+                $("#StudentName").val(data.StudentName);
+                $("#LastName").val(data.LastName);
+                $("#StudentAddress").val(data.StudentAddress);
+                console.log(data);
+             });
+
+        }
+
+
+    </script>
+
+}
+
+
+
