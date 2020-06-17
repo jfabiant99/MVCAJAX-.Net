@@ -86,12 +86,12 @@
 
                 console.log(std);
 
-                if (std.StudentID) {
+                if (std.StudentID!="") {
 
                     $.ajax({
                     type: "POST",
                         url: '@Url.Action("UpdateStudent")',
-                        data: '{ std: ' + JSON.stringify(std) + '}, {id: ' + std.StudentID + '}',
+                        data: '{ std: ' + JSON.stringify(std) + '}',
                     dataType: "json",
                     contentType: "application/json; charset=utf-8",
                     success: function () {

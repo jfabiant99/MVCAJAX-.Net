@@ -63,9 +63,9 @@ namespace MVCAJAX_.Net.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateStudent(Student std, int id)
+        public ActionResult UpdateStudent(Student std)
         {
-            service.Update(std, id);
+            service.Update(std, std.StudentID);
             string message = "SUCCESS";
             return Json(new { Message = message, JsonRequestBehavior.AllowGet });
         }

@@ -53,7 +53,7 @@ namespace Service
                 studentNew.StudentName = student.StudentName;
                 studentNew.LastName= student.LastName;
                 studentNew.StudentAddress = student.StudentAddress;
-                studentNew.FechaModificacion = new DateTime();
+                studentNew.FechaModificacion = DateTime.Now;
 
                 context.SaveChanges();
 
@@ -65,8 +65,8 @@ namespace Service
             using (var context=new SchoolContext())
             {
                 var student = context.Students.Find(ID);
-                context.Students.Remove(student);
-
+                student.Activo = false;
+                //context.Students.Remove(student);
                 context.SaveChanges();
             }
         }
