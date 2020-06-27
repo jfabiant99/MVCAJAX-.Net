@@ -12,7 +12,7 @@ namespace Infraestructure
     {
         public SchoolContext() : base("name=MyContextDB")
         {
-
+            
         }
 
         public DbSet<Student> Students { get; set; }

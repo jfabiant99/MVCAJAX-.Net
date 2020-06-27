@@ -7,13 +7,16 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Services.Description;
+using System.Threading.Tasks;
+using MVCAJAX_.Net.Proxy;
+using System.Collections.ObjectModel;
 
 namespace MVCAJAX_.Net.Controllers
 {
     public class StudentController : Controller
     {
 
-        private StudentService service = new StudentService();
+        private ApiService apiService = new ApiService();
 
         // GET: Student
         public ActionResult Index()
@@ -23,52 +26,50 @@ namespace MVCAJAX_.Net.Controllers
 
         public ActionResult IndexRazor()
         {
-            var model = (from c in service.Get()
-                         select new StudentModel
-                         {
-                             StudentID = c.StudentID,
-                             StudentName = c.StudentName,
-                             StudentAddress = c.StudentAddress
-                         }).ToList();
-
-            return View(model);
+            var model = apiService.GetList<StudentModel>("http://localhost:44387", "/api", "/Student/GetAllStudents");
+            return View(model.Result.Resultado);
         }
 
         public JsonResult getStudent(string id)
         {
-            return Json(service.Get(), JsonRequestBehavior.AllowGet);
+            var response = Task.Run(() => apiService.GetList<StudentModel>("http://localhost:44387", "/api", "/Student/GetAllStudents"));
+            System.Console.WriteLine(response.Result.Resultado);
+            return Json(response.Result.Resultado, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
-        public ActionResult CreateStudent(Student std)
+        public ActionResult CreateStudent(StudentModel std)
         {
-            service.Insert(std);
+            std.FechaCreacion = DateTime.Today;
+            var response = Task.Run(() => apiService.Post<StudentModel>("http://localhost:44387", "/api", "/Student/Post", std));
+
             string message = "SUCCESS";
+
             return Json(new { Message = message, JsonRequestBehavior.AllowGet });
         }
 
-        [HttpPost]
-        public ActionResult DeleteStudent (int id)
-        {
-            service.Delete(id);
-            string message = "SUCCESS";
-            return Json(new { Message = message, JsonRequestBehavior.AllowGet });
-        }
+        //[HttpPost]
+        //public ActionResult DeleteStudent (int id)
+        //{
+        //    service.Delete(id);
+        //    string message = "SUCCESS";
+        //    return Json(new { Message = message, JsonRequestBehavior.AllowGet });
+        //}
 
-        [HttpPost]
-        public ActionResult EstudentDetail(int id)
-        {
-            return (Json(service.GetById(id), JsonRequestBehavior.AllowGet ));
+        //[HttpPost]
+        //public ActionResult EstudentDetail(int id)
+        //{
+        //    return (Json(service.GetById(id), JsonRequestBehavior.AllowGet ));
 
-        }
+        //}
 
-        [HttpPost]
-        public ActionResult UpdateStudent(Student std)
-        {
-            service.Update(std, std.StudentID);
-            string message = "SUCCESS";
-            return Json(new { Message = message, JsonRequestBehavior.AllowGet });
-        }
+        //[HttpPost]
+        //public ActionResult UpdateStudent(Student std)
+        //{
+        //    service.Update(std, std.StudentID);
+        //    string message = "SUCCESS";
+        //    return Json(new { Message = message, JsonRequestBehavior.AllowGet });
+        //}
 
         // GET: Student/Details/5
         public ActionResult Details(int id)

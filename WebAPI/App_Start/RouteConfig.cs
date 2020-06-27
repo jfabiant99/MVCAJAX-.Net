@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace MVCAJAX_.Net
+namespace WebAPI
 {
     public class RouteConfig
     {
@@ -18,7 +18,6 @@ namespace MVCAJAX_.Net
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
-
         }
     }
 }
